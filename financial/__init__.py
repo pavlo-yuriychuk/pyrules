@@ -10,8 +10,9 @@ class Checque:
 		self.items = self.from_string(items)
 
 	def from_string(self, value):
-		return value.split(" ")
-
+		data = value.split(" ")
+		return dict((name, data.count(name)) for name in data)
+		
 class CashDesk:
 	def __init__(self, rules, prices_list):
 		self.rules = rules
