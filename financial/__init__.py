@@ -1,9 +1,15 @@
+#!/usr/bin/python
+
+DEFAULT_PRICES_LIST = [("FR", 3.11), ("CF", 11.23), ("SR", 5.00)]
+
+
 class MarketingRule:
 	def __init__(self):
 		pass
 
 	def apply(self, total, checque, prices_list):
 		return total
+
 
 class BuyOneGetOneForFree(MarketingRule):
 	LABEL = "FR"
@@ -21,6 +27,7 @@ class BuyOneGetOneForFree(MarketingRule):
 				return total - ((count - 1) / 2) * prices_list.get(self.label)
 		else:
 			return total
+
 
 class FewOrMore(MarketingRule):
 	LABEL = "SR"
@@ -41,6 +48,9 @@ class FewOrMore(MarketingRule):
 			return total
 
 
+DEFAULT_RULES = [BuyOneGetOneForFree(), FewOrMore()]
+
+
 class Checque:
 	def __init__(self, items = ""):
 		self.items = self.from_string(items)
@@ -50,8 +60,9 @@ class Checque:
 		data = dict((name, data.count(name)) for name in data)
 		return data
 		
+
 class Checkout:
-	def __init__(self, rules):
+	def __init__(self, rules = DEFAULT_RULES):
 		self.rules = rules
 		
 	def total(self, cheque):
@@ -66,12 +77,10 @@ class Checkout:
 			total = rule.apply(total, cheque, self.prices_list)
 		return total
 
-	def set_prices(self, value):
+	def set_prices(self, value = DEFAULT_PRICES_LIST):
 		self.prices_list = dict(value)
 		return self
 
-DEFAULT_RULES = [BuyOneGetOneForFree(), FewOrMore()]
-DEFAULT_PRICES_LIST = [("FR", 3.11), ("CF", 11.23), ("SR", 5.00)]
 
 if __name__ == "__main__":
 	assert Checque("FR FR").items.get("FR") == 2
