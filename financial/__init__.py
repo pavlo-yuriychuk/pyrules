@@ -1,6 +1,9 @@
 #!/usr/bin/python
+from decimal import *
 
-DEFAULT_PRICES_LIST = [("FR", 3.11), ("CF", 11.23), ("SR", 5.00)]
+getcontext().prec = 4
+
+DEFAULT_PRICES_LIST = [("FR", Decimal("3.11")), ("CF", Decimal("11.23")), ("SR", Decimal("5.00"))]
 
 
 class MarketingRule:
@@ -32,18 +35,18 @@ class BuyOneGetOneForFree(MarketingRule):
 class FewOrMore(MarketingRule):
 	LABEL = "SR"
 	THRESHOLD = 3
-	FACTOR = 4.5 / 5.0
+	DISCOUNT = Decimal("0.5")
 
-	def __init__(self, item_label = LABEL, factor = FACTOR, threshold = THRESHOLD):
+	def __init__(self, item_label = LABEL, discount = DISCOUNT, threshold = THRESHOLD):
 		MarketingRule.__init__(self)
 		self.label = item_label
 		self.threshold = threshold
-		self.factor = factor
+		self.discount = discount
 
 	def apply(self, total, checque, prices_list):
 		count = checque.items.get(self.label, 0)
 		if count >= self.threshold:
-			return total - count * (1.0 - self.factor)*prices_list.get(self.label)
+			return total - count * self.discount
 		else:
 			return total
 
@@ -57,7 +60,7 @@ class Checque:
 
 	def from_string(self, value):
 		data = value.split(" ")
-		data = dict((name, data.count(name)) for name in data)
+		data = dict((name, Decimal(data.count(name))) for name in data)
 		return data
 		
 
@@ -89,6 +92,6 @@ if __name__ == "__main__":
 	assert Checque("FR SR FR FR CF").items.get("FR") == 3
 	assert Checque("FR SR FR FR CF").items.get("CF") == 1
 	assert Checque("FR SR FR FR CF").items.get("SR") == 1
-	assert round(Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("FR FR")), 2) == 3.11
-	assert round(Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("SR SR FR SR")), 2) == 16.61
-	assert round(Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("FR SR FR FR CF")), 2) == 22.45
+	assert Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("FR FR")) == Decimal("3.11")
+	assert Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("SR SR FR SR")) == Decimal("16.61")
+	assert Checkout(DEFAULT_RULES).set_prices(DEFAULT_PRICES_LIST).calculate(Checque("FR SR FR FR CF")) == Decimal("22.45")
